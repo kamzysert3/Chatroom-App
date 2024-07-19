@@ -11,8 +11,8 @@
 <body>
     <main>
         <form class="form-join">
-            <input type="text" id="name" maxlength="10" placeholder="Your name" size="5" required>
-            <input type="text" id="room" placeholder="Chat room" size="5" required>
+            <input type="text" id="name" maxlength="10" placeholder="Your name" size="5" autocomplete="off" required>
+            <input type="text" id="room" placeholder="Chat room" size="5" autocomplete="off" required>
             <button id="join" type="submit">Join</button>
         </form>
         <ul class="chat-display"></ul>
@@ -24,7 +24,7 @@
         <p class="activity"></p>
         
         <form class="form-msg">
-            <input type="text" id="message" placeholder="Your message" required>
+            <input type="text" id="message" placeholder="Your message" autocomplete="off" required>
             <button type="submit">Send</button>
         </form>
     </main>

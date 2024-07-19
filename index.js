@@ -86,8 +86,6 @@ io.on('connection', (socket) => {
     })
     
     socket.on('message', ({ name, text }) => {
-        console.log(`${name}: ${text}`);
-
         const room = getUser(socket.id)?.room
         if (room){
             io.to(room).emit('message', buildMsg(name, text, getUser(socket.id)))
