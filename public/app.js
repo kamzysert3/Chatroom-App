@@ -1,4 +1,5 @@
 const socket = io('https://greysoft-intern-chat-app.onrender.com');
+// const socket = io('ws://localhost:3500');
 
 const msgInput = document.querySelector('#message');
 const nameInput = document.querySelector('#name');
@@ -8,16 +9,14 @@ const usersList = document.querySelector('.user-list');
 const roomList = document.querySelector('.room-list');
 const chatDisplay = document.querySelector('.chat-display');
 
-const room = chatRoom.value
-
 function sendMessage(e) {
     e.preventDefault()
 
     
-    if (nameInput.value && msgInput.value && chatRoom.value) {
+    if (nameInput.value.trim() && msgInput.value.toLowerCase().trim() && chatRoom.value.toLowerCase().trim()) {
         socket.emit('message', {
-            name: nameInput.value,
-            text: msgInput.value,
+            name: nameInput.value.trim(),
+            text: msgInput.value.toLowerCase().trim(),
         })
         msgInput.value = ''
     }
@@ -28,10 +27,10 @@ function sendMessage(e) {
 function enterRoom(e) {
     e.preventDefault()
 
-    if (nameInput.value && chatRoom.value) {
+    if (nameInput.value.trim() && chatRoom.value.toLowerCase().trim()) {
         socket.emit('enterRoom', {
-            name: nameInput.value,
-            room: chatRoom.value,
+            name: nameInput.value.trim(),
+            room: chatRoom.value.toLowerCase().trim(),
         })
     }
 }
@@ -41,7 +40,7 @@ document.querySelector('.form-msg').addEventListener('submit', sendMessage)
 document.querySelector('.form-join').addEventListener('submit', enterRoom)
 
 msgInput.addEventListener('keypress', () => {
-    socket.emit('activity', nameInput.value);
+    socket.emit('activity', nameInput.value.trim());
 })
 
 socket.on('message', (data) => {
@@ -50,8 +49,8 @@ socket.on('message', (data) => {
     const li = document.createElement('li')
     li.className = 'post'
 
-    if (name === nameInput.value) li.className = 'post post--left'
-    if (name !== nameInput.value && name !== 'Admin') li.className = 'post post--right'
+    if (name === nameInput.value.trim()) li.className = 'post post--left'
+    if (name !== nameInput.value.trim() && name !== 'Admin') li.className = 'post post--right'
     if (name !== 'Admin') {
         li.innerHTML = `<div class="post__header post__header--user-${tag}">
         <span class="post__header--name">${name}</span>

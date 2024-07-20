@@ -28,12 +28,19 @@ const io = new server.Server(expressServer, {
     }
 })
 
-// var tag = 1
+var tag = 1
 
 io.on('connection', (socket) => {
     console.log(`User: ${socket.id} connected`);
 
     socket.emit('message', buildMsg(ADMIN, "Welcome to Greysoft Intern Chatroom"))
+
+    activateUser(socket.id, getSmallestTag())
+    console.log(userState.users);
+    
+    socket.emit('roomsList', {
+        rooms: getAllActiveRooms()
+    })
 
     socket.on('enterRoom', ({ name, room }) => {
         const prevRoom = getUser(socket.id)?.room
@@ -42,7 +49,11 @@ io.on('connection', (socket) => {
             io.to(prevRoom).emit('message', buildMsg(ADMIN, `${name} has left the room`))
         }
 
-        const user = activateUser(socket.id, name, room)
+        const user = getUser(socket.id)
+        user.name = name
+        user.room = room
+
+        console.log(userState.users);
 
         if (prevRoom) {
             io.to(prevRoom).emit('userList', {
@@ -102,6 +113,8 @@ io.on('connection', (socket) => {
 })
 
 function buildMsg(name, text, user) {
+    let msgTag
+    if(name !== ADMIN) { msgTag = user.tag }
     return {
         name,
         text,
@@ -110,12 +123,12 @@ function buildMsg(name, text, user) {
             minute: "numeric",
             second: 'numeric'
         }).format(new Date()),
-        tag: userState.users.indexOf(user) + 1
+        tag: (msgTag) % 9,
     }
 }
 
-function activateUser(id, name, room) {
-    const user = {id, name, room }
+function activateUser(id, tag, name='', room='') {
+    const user = {id, tag, name, room }
     userState.setUsers([
         ...userState.users.filter(user => user.id !== id),
         user
@@ -139,4 +152,21 @@ function getUsersInRoom(room) {
 
 function getAllActiveRooms() {
     return Array.from(new Set(userState.users.map(user => user.room)))
+}
+
+function getSmallestTag() {
+    var tagged = userState.users.map(user => user.tag).sort()
+    console.log(tagged);
+
+    if (tagged.length === 0 || tagged[0] !== 1) {
+        return 1
+    }
+
+    for (let j = 0; j < tagged.length - 1; j++) {
+        if (tagged[j + 1] !== tagged[j] + 1) {
+            return (tagged[j] + 1);
+        }        
+    }
+
+    return (tagged[tagged.length - 1] + 1);
 }
