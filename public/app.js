@@ -1,22 +1,21 @@
 const socket = io('https://greysoft-intern-chat-app.onrender.com');
-// const socket = io('ws://localhost:3500');
+// const socket = io('ws://localhost:3001');
 
 const msgInput = document.querySelector('#message');
-const nameInput = document.querySelector('#name');
 const chatRoom = document.querySelector('#room');
 const activity = document.querySelector('.activity');
 const usersList = document.querySelector('.user-list');
 const roomList = document.querySelector('.room-list');
 const chatDisplay = document.querySelector('.chat-display');
+const currentUser = JSON.parse(sessionStorage.getItem('user'));
 
 function sendMessage(e) {
     e.preventDefault()
-
     
-    if (nameInput.value.trim() && msgInput.value.toLowerCase().trim() && chatRoom.value.toLowerCase().trim()) {
+    if (currentUser.name && msgInput.value.trim() !== '' && chatRoom.value) {
         socket.emit('message', {
-            name: nameInput.value.trim(),
-            text: msgInput.value.toLowerCase().trim(),
+            name: currentUser.name,
+            text: msgInput.value.trim(),
         })
         msgInput.value = ''
     }
@@ -26,12 +25,13 @@ function sendMessage(e) {
 
 function enterRoom(e) {
     e.preventDefault()
-
-    if (nameInput.value.trim() && chatRoom.value.toLowerCase().trim()) {
+    if (currentUser.name && chatRoom.value.trim() !== '') {
+        document.querySelector('.chat-display').textContent = '';
         socket.emit('enterRoom', {
-            name: nameInput.value.trim(),
+            name: currentUser.name,
             room: chatRoom.value.toLowerCase().trim(),
         })
+        chatRoom.value = chatRoom.value.trim().toLowerCase()
     }
 }
 
@@ -40,7 +40,7 @@ document.querySelector('.form-msg').addEventListener('submit', sendMessage)
 document.querySelector('.form-join').addEventListener('submit', enterRoom)
 
 msgInput.addEventListener('keypress', () => {
-    socket.emit('activity', nameInput.value.trim());
+    socket.emit('activity', currentUser.name);
 })
 
 socket.on('message', (data) => {
@@ -49,8 +49,8 @@ socket.on('message', (data) => {
     const li = document.createElement('li')
     li.className = 'post'
 
-    if (name === nameInput.value.trim()) li.className = 'post post--left'
-    if (name !== nameInput.value.trim() && name !== 'Admin') li.className = 'post post--right'
+    if (name === currentUser.name) li.className = 'post post--right'
+    if (name !== currentUser.name && name !== 'Admin') li.className = 'post post--left'
     if (name !== 'Admin') {
         li.innerHTML = `<div class="post__header post__header--user-${tag}">
         <span class="post__header--name">${name}</span>
@@ -87,7 +87,7 @@ socket.on('roomsList', ({ rooms }) => {
 function showUsers(users) {
     usersList.textContent = ''
     if (users) {
-        usersList.innerHTML = `<em> Users in ${chatRoom.value}:</em>`
+        usersList.innerHTML = `<em> Users in ${chatRoom.value.trim().toLowerCase()}:</em>`
         users.forEach((user, i) => {
             usersList.textContent += ` ${user.name}`
             if (users.length > 1 && i !== users.length - 1) {

@@ -1,14 +1,39 @@
 const express = require('express')
 const server = require('socket.io')
 const path = require('path')
+const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const processRoutes = require('./routes/users');
+const authenticate = require('./middleware/authenticate');
+const Message = require('./models/Messages');
 
-const PORT = process.env.PORT || 3500
+// MongoDB Connection
+// const dbURI = 'mongodb://localhost:27017/chatroom';
+const dbURI = 'mongodb+srv://kamsinnaegbuna:CQPRUPTkHTDjL3C8@chatroomapp.ru2wple.mongodb.net/?retryWrites=true&w=majority&appName=chatroomApp';
+
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.log(err));
+
+
+const PORT = process.env.PORT || 3001
 
 const ADMIN = "Admin"
 
 const app = express()
 
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(cookieParser())
+
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'register.html'))
+})
+
+app.get('/chat', authenticate, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'chat.html'));
+})
+
+app.use('/process', processRoutes)
 
 const expressServer = app.listen(PORT, (err) => {
     if (err) throw err
@@ -28,21 +53,18 @@ const io = new server.Server(expressServer, {
     }
 })
 
-var tag = 1
-
 io.on('connection', (socket) => {
     console.log(`User: ${socket.id} connected`);
 
     socket.emit('message', buildMsg(ADMIN, "Welcome to Greysoft Intern Chatroom"))
 
     activateUser(socket.id, getSmallestTag())
-    console.log(userState.users);
     
     socket.emit('roomsList', {
         rooms: getAllActiveRooms()
     })
 
-    socket.on('enterRoom', ({ name, room }) => {
+    socket.on('enterRoom', async ({ name, room }) => {
         const prevRoom = getUser(socket.id)?.room
         if (prevRoom) {
             socket.leave(prevRoom)
@@ -53,8 +75,6 @@ io.on('connection', (socket) => {
         user.name = name
         user.room = room
 
-        console.log(userState.users);
-
         if (prevRoom) {
             io.to(prevRoom).emit('userList', {
                 users: getUsersInRoom(prevRoom)
@@ -64,6 +84,12 @@ io.on('connection', (socket) => {
         socket.join(user.room)
 
         socket.emit('message', buildMsg(ADMIN, `You have now joined ${user.room}`))
+
+        const messages = Array.from(await Message.find({ room: user.room }));
+        for (let m = 0; m < messages.length; m++) {
+            socket.emit('message', messages[m]);            
+        }
+
 
         socket.broadcast.to(user.room).emit('message', buildMsg(ADMIN, `${user.name} have now joined the room`))
 
@@ -113,9 +139,7 @@ io.on('connection', (socket) => {
 })
 
 function buildMsg(name, text, user) {
-    let msgTag
-    if(name !== ADMIN) { msgTag = user.tag }
-    return {
+    let messageSent = {
         name,
         text,
         time: new Intl.DateTimeFormat('default', {
@@ -123,8 +147,14 @@ function buildMsg(name, text, user) {
             minute: "numeric",
             second: 'numeric'
         }).format(new Date()),
-        tag: (msgTag) % 9,
+        tag: user?.tag % 9,
+        room: user?.room,
     }
+    if(name !== ADMIN) {
+        const message =  new Message(messageSent);
+        message.save();
+    }
+    return messageSent
 }
 
 function activateUser(id, tag, name='', room='') {
@@ -151,12 +181,17 @@ function getUsersInRoom(room) {
 }
 
 function getAllActiveRooms() {
-    return Array.from(new Set(userState.users.map(user => user.room)))
+    let activeRooms = [];
+    for (let r = 0; r < userState.users.length; r++) {
+        if (userState.users[r].room !== '') {
+            activeRooms.push(userState.users[r].room);
+        }        
+    }
+    return Array.from(new Set(activeRooms))
 }
 
 function getSmallestTag() {
     var tagged = userState.users.map(user => user.tag).sort()
-    console.log(tagged);
 
     if (tagged.length === 0 || tagged[0] !== 1) {
         return 1
@@ -169,4 +204,8 @@ function getSmallestTag() {
     }
 
     return (tagged[tagged.length - 1] + 1);
+}
+
+async function getAllMessagesInRoom(room) {
+    
 }
