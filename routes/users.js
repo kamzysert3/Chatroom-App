@@ -22,8 +22,9 @@ router.post('/register', async (req, res) => {
                 error: 'User with this email already exists'
             });
         }
+        const tag = await getSmallestTag()
 
-        const user = new User({ name, email, password });
+        const user = new User({ name, email, password, tag });
         await user.save();
 
         const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
@@ -34,7 +35,8 @@ router.post('/register', async (req, res) => {
         res.status(200).json({
             redirect: '/chat',
             user: {
-                name: user.name
+                name: user.name,
+                email: user.email
             }
         });
     } catch (err) {
@@ -74,7 +76,8 @@ router.post('/login', async (req, res) => {
         res.status(200).json({ 
             redirect: '/chat',
             user: {
-                name: user.name
+                name: user.name,
+                email: user.email
             }
         });
     } catch (err) {
@@ -90,5 +93,24 @@ router.post('/logout', (req, res) => {
     res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'strict' });
     res.redirect('/');
 });
+
+async function getSmallestTag() {
+
+    var USERS_LIST = Array.from(await User.find())
+
+    USERS_LIST.sort((a, b) => a.tag - b.tag);
+
+    if (USERS_LIST.length === 0 || USERS_LIST[0].tag !== 1) {
+        return 1
+    }
+
+    for (let j = 0; j < USERS_LIST.length - 1; j++) {
+        if (USERS_LIST[j + 1].tag !== USERS_LIST[j].tag + 1) {
+            return (USERS_LIST[j].tag + 1);
+        }        
+    }
+
+    return (USERS_LIST[USERS_LIST.length - 1].tag + 1);
+}
 
 module.exports = router;

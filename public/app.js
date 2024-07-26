@@ -15,6 +15,7 @@ function sendMessage(e) {
     if (currentUser.name && msgInput.value.trim() !== '' && chatRoom.value) {
         socket.emit('message', {
             name: currentUser.name,
+            email: currentUser.email,
             text: msgInput.value.trim(),
         })
         msgInput.value = ''

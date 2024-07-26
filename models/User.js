@@ -15,6 +15,11 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: true
+    },
+    tag: { 
+        type: Number,
+        required: true,
+        unique: true
     }
 }, { timestamps: true });
 
