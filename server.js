@@ -11,7 +11,7 @@ const User = require('./models/User');
 
 // MongoDB Connection
 // const dbURI = 'mongodb://localhost:27017/chatroom';
-const dbURI = 'mongodb+srv://kamsinnaegbuna:CQPRUPTkHTDjL3C8@chatroomapp.ru2wple.mongodb.net/chatroom/?retryWrites=true&w=majority&appName=chatroomApp';
+const dbURI = 'mongodb+srv://kamsinnaegbuna:CQPRUPTkHTDjL3C8@chatroomapp.ru2wple.mongodb.net/?retryWrites=true&w=majority&appName=chatroomApp';
 
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to MongoDB'))
