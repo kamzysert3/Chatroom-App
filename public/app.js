@@ -29,6 +29,7 @@ function sendMessage(e) {
 function createRoom(e) {
     e.preventDefault()
     const roomName = document.getElementById('create-room-name').value
+    activeRoom = roomName
     const roomPassword = document.getElementById('create-room-password').value
     let roomDescription = document.getElementById('description').value
     if (roomDescription == ''){
@@ -36,7 +37,6 @@ function createRoom(e) {
     }
     
     if(roomName){
-        console.log('create-room-name');
         socket.emit('createRoom', {
             RoomName: roomName.toLowerCase().trim(),
             password: roomPassword,
