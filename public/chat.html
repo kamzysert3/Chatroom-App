@@ -7,25 +7,89 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js" integrity="sha512-11t8Q+vY9JlCrr+PveZKTYJq8n7O09Y5X/pk/aMd3vJugSvu4xOunGEUzaADqL3I8cZKE/pBwwCfXzDkRJh2sQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script defer src="app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <main>
-        <form class="form-join">
-            <input type="text" id="room" placeholder="Chat room" size="5" autocomplete="off" required>
-            <button id="join" type="submit">Join</button>
-        </form>
-        <ul class="chat-display"></ul>
-        
-        <p class="user-list"></p>
-        
-        <p class="room-list"></p>
-        
-        <p class="activity"></p>
-        
-        <form class="form-msg">
-            <input type="text" id="message" placeholder="Your message" autocomplete="off" required>
-            <button type="submit">Send</button>
-        </form>
-    </main>
+    <div class="container">
+        <div class="aside-block"></div>
+        <div class="aside-container"></div>
+        <aside>
+            <div class="profile">
+                <div class="profile-pic"></div>
+                <span></span>
+                <button class="close-sidebar">
+                    <i class="fas fas fa-times"></i>
+                </button>
+            </div>
+            <div class="room-list">
+                <p>Active Rooms:</p>
+                <ul class="rooms"></ul>
+            </div>
+            <div class="side-activity">
+                <button class="create-room-btn">
+                    <span>Create Room</span>
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="join-room-btn">
+                    <span>Join Room</span>
+                    <i class="fas fas fa-door-open"></i>
+                </button>
+                <a href="/process/logout" id="logout">
+                    <i class="fas fas fa-sign-out"></i>
+                </a>
+            </div>
+        </aside>
+        <main>
+            <ul class="chat-display"></ul>
+            <p class="user-list"></p>
+
+
+            <!-- <p class="activity"></p> -->
+
+            <form class="form-msg">
+                <input type="text" id="message" placeholder="Your message" autocomplete="off" required>
+                <button type="submit">Send</button>
+            </form>
+        </main>
+        <div class="create-room-box">
+            <form class="create-room-dialog">
+                <h1>Create Room</h1>
+                <div class="field-item">
+                    <label for="create-room-name">Name:</label>
+                    <input type="text" id="create-room-name" placeholder="Enter Room Name" autocomplete="off" required>
+                </div>
+                <div class="field-item">
+                    <label for="create-room-password">Password:</label>
+                    <input type="password" id="create-room-password" placeholder="Enter Room Password (If any)" autocomplete="off">
+                </div>
+                <div class="field-item">
+                    <label for="description">Description (Optional)</label>
+                    <textarea id="description" placeholder="Add Description"></textarea>
+                </div>
+                <button type="submit"><span>Create</span><i class="fas fa-plus"></i></button>
+                <button type="button" class="close-create-room-dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </form>
+        </div>
+        <div class="join-room-box">
+            <form class="join-room-dialog">
+                <h1>Join Room</h1>
+                <div class="field-item">
+                    <label for="join-room-name">Name:</label>
+                    <input type="text" id="join-room-name" placeholder="Enter Room Name" required>
+                </div>
+                <div class="field-item">
+                    <label for="join-room-password">Password:</label>
+                    <input type="password" id="join-room-password" placeholder="Enter Room Password" autocomplete="off">
+                </div>
+                <button type="submit"><span>Join</span><i class="fas fas fa-door-open"></i></button>
+                <button type="button" class="close-join-room-dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

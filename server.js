@@ -6,11 +6,12 @@ const cookieParser = require('cookie-parser');
 const processRoutes = require('./routes/users');
 const authenticate = require('./middleware/authenticate');
 const Message = require('./models/Messages');
+const Room = require('./models/Room');
 const User = require('./models/User');
 
 // MongoDB Connection
 // const dbURI = 'mongodb://localhost:27017/chatroom';
-const dbURI = 'mongodb+srv://kamsinnaegbuna:CQPRUPTkHTDjL3C8@chatroomapp.ru2wple.mongodb.net/?retryWrites=true&w=majority&appName=chatroomApp';
+const dbURI = 'mongodb+srv://kamsinnaegbuna:CQPRUPTkHTDjL3C8@chatroomapp.ru2wple.mongodb.net/chatroom/?retryWrites=true&w=majority&appName=chatroomApp';
 
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to MongoDB'))
@@ -65,16 +66,42 @@ io.on('connection', async (socket) => {
         rooms: getAllActiveRooms()
     })
 
-    socket.on('enterRoom', async ({ name, room }) => {
-        const prevRoom = getUser(socket.id)?.room
-        if (prevRoom) {
-            socket.leave(prevRoom)
-            io.to(prevRoom).emit('message', await buildMsg(ADMIN, `${name} has left the room`))
+    socket.on('createRoom', async ({ RoomName, password, description, username }) => {
+        const AvailableRooms = await Room.find({ RoomName })
+        if (AvailableRooms.length > 0) {
+            return socket.emit('message', await buildMsg(ADMIN, "Room name already exists"));
+        }
+
+        const room = new Room({ RoomName, password, description });
+        await room.save();
+        socket.emit('enterRoom', {
+            name: username,
+            room: RoomName,
+            password: password,
+        })
+    })
+
+    socket.on('enterRoom', async ({ name, room, password }) => {
+        const targetRoom = await Room.findOne({ RoomName: room })
+
+        if (!targetRoom) {
+            return socket.emit('message', await buildMsg(ADMIN, "Room does not exist")); 
+        }
+
+        const isMatch = await targetRoom.isValidPassword(password);
+        if (!isMatch) {
+            return socket.emit('message', await buildMsg(ADMIN, "Invalid password"));
         }
 
         const user = getUser(socket.id)
         user.name = name
+        const prevRoom = getUser(socket.id)?.room
         user.room = room
+        
+        if (prevRoom) {
+            socket.leave(prevRoom)
+            io.to(prevRoom).emit('message', await buildMsg(ADMIN, `${name} has left the room`))
+        }
 
         if (prevRoom) {
             io.to(prevRoom).emit('userList', {
@@ -84,7 +111,7 @@ io.on('connection', async (socket) => {
 
         socket.join(user.room)
 
-        socket.emit('message', await buildMsg(ADMIN, `You have now joined ${user.room}`))
+        socket.emit('message', await buildMsg(ADMIN, `You has now joined ${user.room}`, '', getUser(socket.id)))
 
         const messages = Array.from(await Message.find({ room: user.room }));
         for (let m = 0; m < messages.length; m++) {
@@ -130,11 +157,19 @@ io.on('connection', async (socket) => {
         }
     })    
 
-    socket.on('activity', (name) => {
+    socket.on('typing', () => {
 
         const room = getUser(socket.id)?.room
         if (room){
-            socket.broadcast.to(room).emit('activity', name)
+            socket.broadcast.to(room).emit('typing')
+        }
+    })
+
+    socket.on('stopTyping', () => {
+
+        const room = getUser(socket.id)?.room
+        if (room){
+            socket.broadcast.to(room).emit('stopTyping')
         }
     })
 })
@@ -149,7 +184,8 @@ async function buildMsg(name, text, email, user) {
                 minute: "numeric",
                 second: 'numeric'
             }).format(new Date()),
-            tag: 0,
+            tag: null,
+            room: user?.room
         }
     }
     var USER = await User.find({ email })
@@ -161,7 +197,7 @@ async function buildMsg(name, text, email, user) {
             minute: "numeric",
             second: 'numeric'
         }).format(new Date()),
-        tag: USER[0].tag % 9,
+        tag: (USER[0].tag % 9) + 1,
         room: user.room,
     }
     const message =  new Message(messageSent);

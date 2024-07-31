@@ -89,7 +89,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Logout a User
-router.post('/logout', (req, res) => {
+router.get('/logout', (req, res) => {
     res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'strict' });
     res.redirect('/');
 });
