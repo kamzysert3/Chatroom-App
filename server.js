@@ -52,7 +52,9 @@ const userState = {
 const io = new server.Server(expressServer, {
     cors: {
         origin: process.env.NODE_ENV === 'production' ? false : ["http://localhost:5501", "http://127.0.0.1:5501"],
-    }
+    },
+    pingInterval: 60000,
+    pingTimeout: 60000
 })
 
 io.on('connection', async (socket) => {
