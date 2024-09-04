@@ -45,7 +45,7 @@ aside{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 25%;
+    width: max(25%, 350px);
     background-color: #232930;
     padding: 1rem;
 }
@@ -59,7 +59,6 @@ aside{
 .profile span {
     width: 100%;
     padding: 0 20px;
-    /* text-align: center; */
 }
 
 .profile-pic{
@@ -73,35 +72,137 @@ aside{
     background-color: #343A40;
 }
 
-.close-sidebar{
-    display: none;
-    text-align: end;
+.room-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #343A40;
+    width: fit-content;
+    padding: 6px 12px;
+    border-radius: 20px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
 
-.room-list{
+.room-icon{
+    width: fit-content;
+    display: flex;
+    align-items: center;
+}
+
+.room-pic{
+    font-size: .5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: #232930;
+}
+
+.room-pic i {
+    font-size: .8rem;
+}
+
+.room-icon span {
+    width: 100%;
+    padding: 0 20px;
+}
+
+.list-heading{
+    display: flex;
+    position: relative;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+/* .close-sidebar{
+    display: none;
+    text-align: end;
+} */
+
+.popup{
+    position: absolute;
+    left: 4rem;
+    background-color: #232930;
+    height: 50%;
+    width: min(80%, 300px);
+    padding: 12px;
+    overflow: hidden;
+    z-index: 3;
+    border-radius: 20px;
+}
+
+.friends-popup, .room-popup{
+    height: 100%;
+}
+
+/* .room-list{
     height: 100%;
     padding: 12px 0;
     overflow: hidden;
+} */
+
+.popup ul{
+    list-style: none;
+    overflow-y: scroll;
+    height: 80%;
+}.popup ul li:hover, .room-popup ul li:hover, .friends-popup ul li:hover{
+    cursor: pointer;
+    background-color: #343A40;
 }
 
-.room-list ul{
+.popup > div > div > i {
+    margin-right: 1rem;
+}
+
+/* .room-list ul{
     list-style: none;
     height: 80%;
     overflow-y: scroll;
 }.room-list ul li:hover{
     cursor: pointer;
     background-color: #343A40;
-}
+} */
 
-.active-room{
+/* .active-room{
     color: #fff;
     font-weight: bold;
     padding: 1rem;
     text-transform: capitalize;
     position: relative;
+} */
+
+.active-room, .friend{
+    color: #fff;
+    font-weight: bold;
+    padding: 1rem;
+    text-transform: capitalize;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.side-activity{
+.logout-btn {
+    width: 100%;
+    background-color: #0069d9;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .5rem;
+    cursor: pointer;
+    position: relative;
+    color: #ced4da;
+    display: flex;
+    text-decoration: none;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+/* .side-activity{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -136,7 +237,7 @@ aside{
     padding: .5rem;
     font-size: .8rem;
     white-space: nowrap;
-}
+} */
 
 .form-msg {
     width: 100%;
@@ -144,6 +245,12 @@ aside{
     flex-flow: row nowrap;
     justify-content: center;
     gap: .5rem;
+}
+
+.form-msg button{
+    width: fit-content;
+    padding: .5rem;
+    cursor: pointer;
 }
 
 input, textarea {
@@ -164,7 +271,7 @@ input, textarea {
 }
 
 button {
-    width: 20%;
+    /* width: 20%; */
     background-color: #0069d9;
     color: #fff;
     border: none;
@@ -228,6 +335,10 @@ button {
     gap: 1rem;
 }
 
+.post__header--user-0 {
+    background-color: black;
+}
+
 .post__header--user-1 {
     background-color: darkblue;
 }
@@ -286,7 +397,7 @@ button {
     font-style: italic;
 }
 
-.create-room-box, .join-room-box{
+.box{
     position: absolute;
     top: 0;
     left: 0;
@@ -297,34 +408,55 @@ button {
     display: none;
     justify-content: center;
     align-items: center;
-    z-index: 3;
+    z-index: 5;
 }
 
-.create-room-dialog, .join-room-dialog {
+.create-room-dialog, .join-room-dialog, .add-friend-dialog{
     width: 60%;
     /* aspect-ratio: 16/9; */
     border-radius: 20px;
     padding: 12px;
     background-color: #232930;
     box-shadow: 0px 0px 2px #ced4da inset;
+    display: none;
 }
 
-.create-room-dialog h1, .join-room-dialog h1{
+.visible {
+    display: block !important;
+}
+
+.create-room-dialog h1, .join-room-dialog h1, .add-friend-dialog h1{
     font-size: 1.5rem;
     text-align: center;
     margin: 20px;
 }
 
-.create-room-dialog div, .join-room-dialog div{
+.create-room-dialog div, .join-room-dialog div, .add-friend-dialog div{
     margin-bottom: 10px;
 }
 
-.create-room-dialog button[type=submit] span, .join-room-dialog button[type=submit] span{
+.create-room-dialog button[type=submit] span, .join-room-dialog button[type=submit] span, .add-friend-dialog button[type=submit] span{
     display: block;
 }
 
-.create-room-dialog button[type=submit] i, .join-room-dialog button[type=submit] i{
+.create-room-dialog button[type=submit] i, .join-room-dialog button[type=submit] i, .add-friend-dialog button[type=submit] i{
     display: none;
+}
+
+.room-list-icon, .friends-list-icon, .settings-icon, .ai-icon{
+    display: none;
+}
+
+.popup
+{
+    display: none;
+}
+
+@media (min-width: 769px) {
+    .popup
+    {
+        display: none !important;
+    }
 }
 
 .activity-container {
@@ -364,6 +496,32 @@ button {
     animation-delay: 0.6s;
 }
 
+.disabled{
+    opacity: .5;
+    pointer-events: none;
+}
+
+.room-list-icon-alt,
+.friends-list-icon-alt,
+.settings-icon-alt,
+.ai-icon-alt
+{
+    display: block;
+    padding: .5rem;
+    gap: 1rem;
+    cursor: pointer;
+    background-color: #0069d9;
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+    transition: background-color.1s ease-in-out;
+    border-radius: 10px;
+}
+
+.tabs{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
 @keyframes bounce {
     0%, 80%, 100% {
         transform: translateY(0);
@@ -382,35 +540,23 @@ button {
         width: 50px;
         height: 100vh;
         transition: width .1s ease-in-out;
-        z-index: 2;
+        z-index: 4;
+    }
+
+    .tabs{
+        align-items: center;
     }
 
     .aside-block{
         min-width: 50px;
         min-height: 100vh;
     }
-    
-    .aside-container[class$='active-sidebar']{
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        background-color: #00000020;
-        backdrop-filter: blur(5px);
-        z-index: 1;
-        transition: .1s ease-in-out;
-    }
 
-    aside.active-sidebar{
-        width: 50%;
-    }
-
-    .profile-pic:not([class$='active-sidebar']) {
+    .profile-pic{
         min-width: 25px;
         height: 25px;
         font-size: .5rem;
-    }.profile-pic:not([class$='active-sidebar']):hover::after {
+    }.profile-pic:hover::after {
         content: attr(data-name);
         position: absolute;
         top: 0;
@@ -422,38 +568,82 @@ button {
         white-space: nowrap;
     }
 
-    .profile span:not([class$='active-sidebar']) {
+    .profile span{
         display: none;
     }
 
-    .close-sidebar[class$='active-sidebar'] {
+    .room-list{
+        display: none;
+    }
+
+    .room-list-icon,
+    .friends-list-icon,
+    .settings-icon,
+    .ai-icon
+    {
         display: block;
+        padding: .5rem;
+        gap: 1rem;
         cursor: pointer;
-        text-align: center;
     }
 
-    .room-list:not([class$='active-sidebar']){
-        display: none;
+    .room-list-icon:hover::after {
+        content: 'Recent Rooms';
+        position: absolute;
+        top: 3rem;
+        left: 2.5rem;
+        z-index: 4 ;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: .5rem;
+        font-size: .8rem;
+        white-space: nowrap;
+    }
+    .friends-list-icon:hover::after {
+        content: 'Friends List';
+        position: absolute;
+        top: 5rem;
+        left: 2.5rem;
+        z-index: 4 ;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: .5rem;
+        font-size: .8rem;
+        white-space: nowrap;
+    }
+    .settings-icon:hover::after {
+        content: 'Settings';
+        position: absolute;
+        top: 0;
+        left: 2.5rem;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: .5rem;
+        font-size: .8rem;
+        white-space: nowrap;
+    }
+    .ai-icon:hover::after {
+        content: 'AI';
+        position: absolute;
+        top: 7rem;
+        left: 2.5rem;
+        z-index: 4 ;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: .5rem;
+        font-size: .8rem;
+        white-space: nowrap;
     }
 
     form{
         margin-top: 1rem;
     }
 
-    .side-activity:not([class$='active-sidebar']) {
-        flex-direction: column;
-        gap: .5rem;
-    }
-
-    .side-activity button:not([class$='active-sidebar']) {
-        width: 25px;
-        height: 25px;
-        padding: 0;
-    }.create-room-btn:hover::after {
+    .create-room-btn:hover::after {
         content: 'Create Room';
         position: absolute;
-        top: 0;
-        left: 2.5rem;
+        top: 2.5rem;
+        right: 2.5rem;
         background-color: rgba(0, 0, 0, 0.8);
         color: #fff;
         padding: .5rem;
@@ -462,8 +652,18 @@ button {
     }.join-room-btn:hover::after {
         content: 'Join Room';
         position: absolute;
-        top: 0;
-        left: 2.5rem;
+        top: 2.5rem;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: .5rem;
+        font-size: .8rem;
+        white-space: nowrap;
+    }.add-friend-btn:hover::after {
+        content: 'Add Friend';
+        position: absolute;
+        top: 2.5rem;
+        right: 0;
         background-color: rgba(0, 0, 0, 0.8);
         color: #fff;
         padding: .5rem;
@@ -471,29 +671,41 @@ button {
         white-space: nowrap;
     }
 
-    .side-activity button span:not([class$='active-sidebar']) {
+    .logout-btn{
+        width: 25px;
+        justify-content: center;
+        background-color: transparent;
+    }.logout-btn:hover::after {
+        content: 'logout';
+        position: absolute;
+        top: -2.5rem;
+        left: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: .5rem;
+        font-size: .8rem;
+        white-space: nowrap;
+    }
+
+    .logout-btn span
+    {
         display: none;
     }
-    .side-activity button i:not([class$='active-sidebar']) {
-        font-size: .5rem;
-        display: block;
-    }
 
-    #logout:not([class$='active-sidebar'])::after {
-        top: -.5rem;
-        left: 2.5rem;
-    }
-
-    .create-room-dialog, .join-room-dialog{
+    .create-room-dialog, .join-room-dialog, .add-friend-dialog{
         width: 80%;
     }
 
-    .create-room-dialog button[type=submit] span, .join-room-dialog button[type=submit] span{
+    .create-room-dialog button[type=submit] span, .join-room-dialog button[type=submit] span, .add-friend-dialog button[type=submit] span{
         display: none;
     }
 
-    .create-room-dialog button[type=submit] i, .join-room-dialog button[type=submit] i{
+    .create-room-dialog button[type=submit] i, .join-room-dialog button[type=submit] i, .add-friend-dialog button[type=submit] i{
         display: block;
+    }
+
+    .max-view-aside{
+        display: none;
     }
 }
 
@@ -504,5 +716,11 @@ button {
 
     .profile{
         justify-content: space-between;
+    }
+}
+
+@media (hover: none) {
+    .room-list-icon:hover::after, .friends-list-icon:hover::after, .ai-icon:hover::after{
+        display: none;
     }
 }

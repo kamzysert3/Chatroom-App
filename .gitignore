@@ -2,3 +2,6 @@ node_modules
 models/test-users.json
 UI
 .vscode
+plan.md
+models/aichat.js
+models/messageun.js

@@ -4,6 +4,11 @@ const bcrypt = require('bcryptjs');
 
 //Message Schema
 const messageSchema = new Schema ({
+    id: {
+        type: Number,
+        required: true,
+        unique: true
+    },
     name: {
         type: String,
         required: true
@@ -26,7 +31,9 @@ const messageSchema = new Schema ({
     },
     room: {
         type: String,
-        required: true
+    },
+    privateroom: {
+        type: String,
     }
 });
 

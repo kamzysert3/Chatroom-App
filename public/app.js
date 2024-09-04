@@ -1,27 +1,62 @@
-const socket = io('https://greysoft-intern-chat-app.onrender.com');
-// const socket = io('ws://localhost:3001');
+// const socket = io('https://greysoft-intern-chat-app.onrender.com');
+const socket = io('ws://localhost:3001');
 
 const msgInput = document.querySelector('#message');
 const usersList = document.querySelector('.user-list');
-const roomList = document.querySelector('.room-list ul');
+const friendsLists = document.querySelectorAll('.friends');
+const roomLists = document.querySelectorAll('.rooms');
 const chatDisplay = document.querySelector('.chat-display');
 const currentUser = JSON.parse(sessionStorage.getItem('user'));
+
 let activeRoom;
 let activityTimer;
 let activitybool = false;
 
-function sendMessage(e) {
+async function sendMessage(e) {
     e.preventDefault();
 
+    
     if (currentUser.name && msgInput.value.trim() !== '') {
         socket.emit('message', {
             name: currentUser.name,
             email: currentUser.email,
             text: msgInput.value.trim(),
         });
-        msgInput.value = '';
+    }
+    
+    if (activeRoom == "AI Chat" || msgInput.value.trim().startsWith("@AI")) {
+        async function GetAIResponse() {
+            let message;            
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: msgInput.value.trim().startsWith('@AI') ? msgInput.value.trim().substring(4) : msgInput.value.trim(),
+                }),
+            })
+
+            const data = await response.json();            
+            
+            if(data.answer.error){
+                console.error(data.answer.error);
+                message = "Something went wrong"
+            } else {
+                message = data.answer.prediction;
+                message = message.replace(/\[INST\] .*? \[\/INST\]/g, '');
+            }
+
+            socket.emit('message', {
+                name: 'AI Chat',
+                text: message,
+            });
+
+        }
+        GetAIResponse()
     }
 
+    msgInput.value = '';
     msgInput.focus();
 }
 
@@ -44,11 +79,20 @@ function createRoom(e) {
             username: currentUser.name
         })
     }
-    document.querySelector('.create-room-box').style.display = 'none'
+    document.querySelector('.chat-display').classList.remove('disabled');
+    document.querySelector('.messageInp').classList.remove('disabled');
+    document.querySelector('.messageInp').placeholder = "Your message"
+    document.querySelector('.create-room-dialog').classList.toggle('visible');
+    document.querySelector('.box').style.display = 'none'
     document.querySelector('#create-room-name').value = ''
     document.querySelector('#create-room-password').value = ''
     document.querySelector('#description').value = ''
 }
+
+socket.on('enterCreatedRoom', (room) => {
+    socket.emit('enterRoom', room);
+})
+
 
 function joinRoom(e) {
     e.preventDefault()
@@ -63,11 +107,62 @@ function joinRoom(e) {
             password: roomPassword,
         })
     }
-    document.querySelector('.join-room-box').style.display = 'none'
+    document.querySelector('.chat-display').classList.remove('disabled');
+    document.querySelector('.messageInp').classList.remove('disabled');
+    document.querySelector('.messageInp').placeholder = "Your message"
+    document.querySelector('.join-room-dialog').classList.toggle('visible');
+    document.querySelector('.box').style.display = 'none'
     document.querySelector('#join-room-name').value = ''
     document.querySelector('#join-room-password').value = ''
       
 }
+
+function addFriend(e) {
+    e.preventDefault()
+    const friendName = document.getElementById('add-friend-name').value
+    
+    if(friendName){
+        socket.emit('addFriend', {
+            email: currentUser.email,
+            friend: friendName,
+        })
+    }
+    document.querySelector('.add-friend-dialog').classList.toggle('visible');
+    document.querySelector('.box').style.display = 'none'
+    document.querySelector('#add-friend-name').value = ''
+}
+
+function connect() {    
+    socket.emit('connects', {
+        email: currentUser.email
+    })
+}
+
+function chatFriend() {
+    const roomName = "Chat"
+    activeRoom = roomName 
+    socket.emit('chatFriend', {
+        name: currentUser.name,
+        friend: this.innerText,
+    })
+    document.querySelector('.chat-display').classList.remove('disabled');
+    document.querySelector('.messageInp').classList.remove('disabled');
+    document.querySelector('.messageInp').placeholder = "Your message"
+}
+
+function AIChat() {
+    const roomName = "AI Chat"
+    activeRoom = roomName
+    socket.emit('chatFriend', {
+        name: currentUser.name,
+        friend: roomName,
+    });
+    document.querySelector('.chat-display').classList.remove('disabled');
+    document.querySelector('.messageInp').classList.remove('disabled');
+    document.querySelector('.messageInp').placeholder = "Your message"
+}
+
+document.addEventListener('DOMContentLoaded', connect)
 
 document.querySelector('.create-room-dialog').addEventListener('submit', createRoom)
 
@@ -75,12 +170,16 @@ document.querySelector('.join-room-dialog').addEventListener('submit', joinRoom)
 
 document.querySelector('.form-msg').addEventListener('submit', sendMessage)
 
+document.querySelector('.add-friend-dialog').addEventListener('submit', addFriend)
+
 socket.on('message', (data) => {
     activityTimer = setTimeout(() => {
         socket.emit('stopTyping');
-    }, 1);    const {name, text, time, tag, room} = data
+    }, 1);    
+    const {id, name, text, time, tag} = data
     const li = document.createElement('li')
     li.className = 'post'
+    li.id = id
 
     if (name === currentUser.name) li.className = 'post post--right'
     if (name !== currentUser.name && name !== 'Admin') li.className = 'post post--left'
@@ -91,9 +190,6 @@ socket.on('message', (data) => {
         </div>
         <div class="post__text">${text}</div>`
     } else {
-        if (room) {
-            document.querySelector('.chat-display').textContent = '';
-        }
         li.innerHTML = `<div class="post__text">${text}</div>`
     }
 
@@ -110,6 +206,10 @@ socket.on('roomsList', ({ rooms }) => {
     showRooms(rooms)
 })
 
+socket.on('FriendsList', ({ friends }) => {
+    showFriends(friends)
+})
+
 function showUsers(users) {
     usersList.textContent = ''
     if (users) {
@@ -124,22 +224,60 @@ function showUsers(users) {
 }
 
 function showRooms(rooms) {
-    roomList.textContent = ''
-    if (rooms) {
-        rooms.forEach((room) => {
-            roomList.innerHTML += `<li class='active-room'> ${room} </li>`
-        });
-    }
+    roomLists.forEach((roomList) => {
+        roomList.textContent = ''
+        if (rooms.length > 0) {
+            rooms.forEach((room) => {
+                roomList.innerHTML += `<li class='active-room'> ${room} </li>`
+            });
+        } else {
+            roomList.innerHTML = `<li class='active-room disabled'> No Recent rooms </li>`;
+        }
+    });
+    document.querySelectorAll('.rooms li').forEach(function(room) {
+        room.addEventListener('click', function() {
+            document.querySelector('.box').style.display = 'flex'
+            document.querySelector('.join-room-dialog').classList.toggle('visible');
+            document.querySelector('#join-room-name').value = room.textContent
+        })
+    })
 }
 
-socket.on('enterRoom', (room) => {
-    socket.emit('enterRoom', room);
-})
+function showFriends(friends) {
+    friendsLists.forEach((friendsList) => {
+        friendsList.textContent = '';
+        if (friends.length > 0) {
+            friends.forEach((friend) => {
+                friendsList.innerHTML += `
+                <li class="friend">
+                    <span>${friend}</span>
+                </li>`
+            });
+        } else {
+            friendsList.innerHTML = `<li class="friend disabled">No friends added yet</li>`;
+        }
+    });
+    document.querySelectorAll('.friends li').forEach(function(userFriend) {
+        userFriend.addEventListener('click', chatFriend)
+    })
+    
+}
 
+function chatDetail(room, type) {
+    document.querySelector('.room-icon span').textContent = room;
+    if (type === 'Chatroom') {
+        document.querySelector('.room-pic').innerHTML = '<i class="fas fa-comments"></i>';
+    } else if (type === 'private Chat') {
+        document.querySelector('.room-pic').innerHTML = '<i class="fas fa-user-friends"></i>';
+    } else {
+        document.querySelector('.room-pic').innerHTML = '<i class="fas fa-microchip"></i>';
+    }
+    document.querySelector('.chat-display').textContent = ''
+}
 
 function isTyping(typing) {
     if (typing) {
-    chatDisplay.scrollTop = chatDisplay.scrollHeight
+        chatDisplay.scrollTop = chatDisplay.scrollHeight
         if (!document.getElementById('typingIndicator')) {
             const typingIndicator = document.createElement('li');
             typingIndicator.id = 'typingIndicator';
@@ -177,3 +315,7 @@ socket.on('typing', () => {
 socket.on('stopTyping', () => {
     isTyping(false);
 });
+
+socket.on('roomDetails', ({ roomName, type }) => {
+    chatDetail(roomName, type)
+})

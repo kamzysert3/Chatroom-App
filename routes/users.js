@@ -1,9 +1,11 @@
 const express = require('express');
 const User = require('../models/User');
+const PrivateChat = require('../models/PrivateChat');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 var bodyParser = require('body-parser');
+const privateChat = require('../models/PrivateChat');
 
 router.use(bodyParser.json())
 
@@ -26,6 +28,15 @@ router.post('/register', async (req, res) => {
 
         const user = new User({ name, email, password, tag });
         await user.save();
+
+        const AIchat = new privateChat({
+            privateChatName: [
+               name.toLowerCase(),
+               "ai chat"
+            ].sort(),
+            name: `${name}, AI chat`
+        });
+        await AIchat.save()
 
         const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
 

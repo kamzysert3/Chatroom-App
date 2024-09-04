@@ -5,7 +5,8 @@ const bcrypt = require('bcryptjs');
 const userSchema = new Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     email: {
         type: String,
@@ -20,6 +21,12 @@ const userSchema = new Schema({
         type: Number,
         required: true,
         unique: true
+    },
+    friends: {
+        type: [String]
+    },
+    activity: {
+        type: [String]
     }
 }, { timestamps: true });
 

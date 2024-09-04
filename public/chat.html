@@ -14,44 +14,97 @@
         <div class="aside-block"></div>
         <div class="aside-container"></div>
         <aside>
-            <div class="profile">
-                <div class="profile-pic"></div>
-                <span></span>
-                <button class="close-sidebar">
-                    <i class="fas fas fa-times"></i>
-                </button>
+            <div class="tabs">
+                <div class="profile icons">
+                    <div class="profile-pic">R</div>
+                    <span>Raymond</span>
+                    <!-- <button class="close-sidebar">
+                        <i class="fas fas fa-times"></i>
+                    </button> -->
+                </div>
+                <div class="room-list-icon room icons">
+                    <i class="fas fa-comments room"></i>
+                </div>
+                <div class="friends-list-icon your-friends icons">
+                    <i class="fas fa-user-friends your-friends"></i>
+                </div>
+                <div class="ai-icon your-ai icons">
+                    <i class="fas fa-microchip your-ai"></i>
+                </div>
+
             </div>
-            <div class="room-list">
-                <p>Active Rooms:</p>
-                <ul class="rooms"></ul>
+
+            <div class="max-view-aside" style="height: 100%;">
+                <div style="display: flex; gap: 10px; padding: 12px 0;">
+                    <div class="room-list-icon-alt room icons">
+                        <i class="fas fa-comments room"></i>
+                    </div>
+                    <div class="friends-list-icon-alt your-friends icons">
+                        <i class="fas fa-user-friends your-friends"></i>
+                    </div>
+                    <div class="ai-icon-alt your-ai icons">
+                        <i class="fas fa-microchip your-ai"></i>
+                    </div>
+                </div>
+                <div class="room-popup" style="display: none;">
+                   <div class="list-heading">
+                        <div>
+                            <i class="fas fa-comments"></i>
+                            <span>Recent Rooms:</span>
+                        </div>
+                        <div style="position: relative; overflow: visible;">
+                            <button class="create-room-btn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="join-room-btn">
+                                <i class="fas fas fa-door-open"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <ul class="rooms">
+                    </ul>
+                </div>
+                <div class="friends-popup" style="display: block;">
+                    <div class="list-heading">
+                        <div>
+                            <i class="fas fa-user-friends"></i>
+                            <span>Friends list:</span>
+                        </div>
+                        <div style="position: relative;">
+                            <button class="add-friend-btn"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <ul class="friends">
+                    </ul>
+                </div>
             </div>
-            <div class="side-activity">
-                <button class="create-room-btn">
-                    <span>Create Room</span>
-                    <i class="fas fa-plus"></i>
-                </button>
-                <button class="join-room-btn">
-                    <span>Join Room</span>
-                    <i class="fas fas fa-door-open"></i>
-                </button>
-                <a href="/process/logout" id="logout">
-                    <i class="fas fas fa-sign-out"></i>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; position: relative;">
+                <a href="/process/logout" id="logout" class="logout-btn">
+                    <span>Logout</span> 
+                    <i class="fas fa-sign-out"></i>
                 </a>
             </div>
         </aside>
         <main>
-            <ul class="chat-display"></ul>
+            <div class="room-info">
+                <div class="room-icon">
+                    <div class="room-pic"><i class="fas fa-user"></i></div>
+                    <span>Chatroom</span>
+                </div>
+            </div>
+            <ul class="chat-display disabled"></ul>
             <p class="user-list"></p>
 
 
             <!-- <p class="activity"></p> -->
 
             <form class="form-msg">
-                <input type="text" id="message" placeholder="Your message" autocomplete="off" required>
-                <button type="submit">Send</button>
+                <input type="text" class="messageInp disabled" id="message" placeholder="Enter a room to chat" autocomplete="off" required>
+                <button type="submit"><i class="fas fa-paper-plane"></i></button>
             </form>
         </main>
-        <div class="create-room-box">
+        <div class="box">
             <form class="create-room-dialog">
                 <h1>Create Room</h1>
                 <div class="field-item">
@@ -71,8 +124,6 @@
                     <i class="fas fa-times"></i>
                 </button>
             </form>
-        </div>
-        <div class="join-room-box">
             <form class="join-room-dialog">
                 <h1>Join Room</h1>
                 <div class="field-item">
@@ -82,14 +133,59 @@
                 <div class="field-item">
                     <label for="join-room-password">Password:</label>
                     <input type="password" id="join-room-password" placeholder="Enter Room Password" autocomplete="off">
+                    <p>(Leave blank if room has no password)</p>
                 </div>
                 <button type="submit"><span>Join</span><i class="fas fas fa-door-open"></i></button>
                 <button type="button" class="close-join-room-dialog">
                     <i class="fas fa-times"></i>
                 </button>
             </form>
+            <form class="add-friend-dialog">
+                <h1>Add Friend</h1>
+                <div class="field-item">
+                    <label for="add-friend-name">Username</label>
+                    <input type="text" id="add-friend-name" placeholder="Enter Friend Name" required>
+                </div>
+                <button type="submit"><span>Send Request</span><i class="fas fa-user-plus"></i></button>
+                <button type="button" class="close-add-friend-dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </form>
         </div>
+        <div class="popup">
+            <div class="friends-popup">
+                <div class="list-heading">
+                    <div>
+                        <i class="fas fa-user-friends"></i>
+                        <span>Friends list:</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="add-friend-btn"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <ul class="friends">
+                </ul>
+            </div>
+            <div class="room-popup">
+                <div class="list-heading">
+                    <div>
+                        <i class="fas fa-comments"></i>
+                        <span>Recent Rooms:</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="create-room-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="join-room-btn">
+                            <i class="fas fas fa-door-open"></i>
+                        </button>
+                    </div>
+                </div>
+                <ul class="rooms">
+                </ul>
+            </div>
+        </div> 
     </div>
-    <script src="script.js"></script>
+    <script defer src="script.js"></script>
 </body>
 </html>
