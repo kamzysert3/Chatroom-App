@@ -1,5 +1,5 @@
-// const socket = io('https://greysoft-intern-chat-app.onrender.com');
-const socket = io('ws://localhost:3001');
+const socket = io('https://greysoft-intern-chat-app.onrender.com');
+// const socket = io('ws://localhost:3001');
 
 const msgInput = document.querySelector('#message');
 const usersList = document.querySelector('.user-list');
