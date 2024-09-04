@@ -13,7 +13,8 @@ const privateChat = require('./models/PrivateChat');
 const User = require('./models/User');
 
 // MongoDB Connection
-const dbURI = process.env.dbURI || 'mongodb://localhost:27017/chatroom';
+const dbURI = 'mongodb+srv://kamsinnaegbuna:CQPRUPTkHTDjL3C8@chatroomapp.ru2wple.mongodb.net/?retryWrites=true&w=majority&appName=chatroomApp';
+// const dbURI = 'mongodb://localhost:27017/chatroom';
 
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to MongoDB'))
