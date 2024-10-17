@@ -2,7 +2,7 @@ const axios = require('axios')
 
 exports.answer = async (q) => {
     try {
-        const response = await axios.post('https://f227-34-19-49-144.ngrok-free.app/predict', {
+        const response = await axios.post('https://8819-34-124-138-80.ngrok-free.app/predict', {
             input_text: q
         });
 
