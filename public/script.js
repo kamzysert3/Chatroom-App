@@ -120,6 +120,12 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelector('#add-friend-name').value = ''
     })
 
+    document.querySelector('.close-edit-message-dialog').addEventListener('click', function() {
+        document.querySelector('.edit-message-dialog').classList.toggle('visible');
+        document.querySelector('.box').style.display = 'none'
+        document.querySelector('#edited-message').value = ''
+    })
+
     const friendsPopup = document.querySelectorAll('.friends-popup')
     const roomsPopup = document.querySelectorAll('.room-popup')
     function friendsList() {

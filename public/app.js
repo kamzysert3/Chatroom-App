@@ -162,6 +162,23 @@ function AIChat() {
     document.querySelector('.messageInp').placeholder = "Your message"
 }
 
+function openEditMessageDialog() {
+    document.querySelector('.edit-message-dialog').classList.toggle('visible');
+    document.querySelector('.box').style.display = 'flex';
+}
+
+function editMessageFunc(e) {
+    e.preventDefault()
+    const id = document.getElementById('edited-message-id').value
+    const text = document.querySelector('#edited-message').value    
+    socket.emit('editMessage', {
+        id,
+        text,
+    })
+    document.querySelector('.edit-message-dialog').classList.toggle('visible');
+    document.querySelector('.box').style.display = 'none';
+}
+
 document.addEventListener('DOMContentLoaded', connect)
 
 document.querySelector('.create-room-dialog').addEventListener('submit', createRoom)
@@ -171,6 +188,8 @@ document.querySelector('.join-room-dialog').addEventListener('submit', joinRoom)
 document.querySelector('.form-msg').addEventListener('submit', sendMessage)
 
 document.querySelector('.add-friend-dialog').addEventListener('submit', addFriend)
+
+document.querySelector('.edit-message-dialog').addEventListener('submit', editMessageFunc)
 
 socket.on('message', (data) => {
     activityTimer = setTimeout(() => {
@@ -193,9 +212,62 @@ socket.on('message', (data) => {
         li.innerHTML = `<div class="post__text">${text}</div>`
     }
 
+    // context menu
+    li.addEventListener('contextmenu', (ev) => {
+        ev.preventDefault();
+        const menuOptions = `
+        <li>Copy Message</li>
+        `;
+        if ((!ev.target.parentElement.classList.contains('post')) || ev.target.classList.contains('post__header')) {
+            return;
+        }
+        const menu = document.createElement('div');
+        menu.classList.add('context-menu');
+        menuList = document.createElement('ul');        
+        menuList.innerHTML = ev.target.parentElement.classList.contains('post--right') ? menuOptions + `
+        <li>Edit Message</li>
+        <li>Delete Message</li>
+        ` : menuOptions;
+        menu.appendChild(menuList);
+        document.body.appendChild(menu);
+        // const { left, top } = li.getBoundingClientRect();
+        menu.style.left = `${ ev.clientX - 10}px`;
+        menu.style.top = `${ ev.clientY - 10}px`;
+        menu.addEventListener('click', (e) => {
+            if (e.target.innerText === 'Copy Text') {
+                navigator.clipboard.writeText(ev.target.parentElement.querySelector('.post__text').innerText);
+            } else if (e.target.innerText === 'Delete Message') {          
+                socket.emit('deleteMessage', {
+                    id: ev.target.parentElement.id
+                });
+            } else if (e.target.innerText === 'Edit Message') {
+                document.getElementById('edited-message-id').value = ev.target.parentElement.id
+                document.querySelector('#edited-message').value = ev.target.parentElement.querySelector('.post__text').innerText;
+                openEditMessageDialog();
+            }
+            menu.remove();
+        });
+
+        // codes to remove context menu
+        document.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('.context-menu')) {
+                menu.remove();
+            }
+        });
+    });
     document.querySelector('.chat-display').appendChild(li)
 
     chatDisplay.scrollTop = chatDisplay.scrollHeight
+})
+
+socket.on('editedMessage', (message) => {
+    const li = document.getElementById(message.id)
+    li.querySelector('.post__text').textContent = message.text
+})
+
+socket.on('deletedMessage', (message) => {
+    const li = document.getElementById(message.id)
+    li.remove()
 })
 
 socket.on('userList', ({ users }) => {

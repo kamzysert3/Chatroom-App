@@ -38,6 +38,9 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'register.html'))
 })
+app.get('/forgot-password', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'forgot-password.html'))
+})
 
 app.get('/chat', authenticate, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'chat.html'));
@@ -82,7 +85,7 @@ io.on('connection', async (socket) => {
     console.log(`User: ${socket.id} connected`);    
     
     socket.on('connects', async ({ email }) => {
-        socket.emit('message', await buildMsg(ADMIN, "Welcome to Greysoft Intern Chatroom"))
+        socket.emit('message', await buildMsg(ADMIN, "Welcome to Chatter"))
 
         var USER = await User.find({ email });
         await activateUser(socket.id, USER[0].name)
@@ -279,6 +282,34 @@ io.on('connection', async (socket) => {
         // return io.to(socket.id).emit('message', await buildMsg(name, text, email, getUser(socket.id)))
 
     })    
+    
+    socket.on('editMessage', async ({ id, text }) => {
+        const room = getUser(socket.id)?.room
+        const privateRoom = getUser(socket.id)?.privateroom
+
+        const message = await Message.findOneAndUpdate({ id }, { text: text }, { new: true })
+        if (room){
+            return io.to(room).emit('editedMessage', message)
+        }
+        if (privateRoom){
+            return io.to(privateRoom).emit('editedMessage', message)
+        }
+    })
+
+    socket.on('deleteMessage', async ({ id }) => {
+        const room = getUser(socket.id)?.room
+        const privateRoom = getUser(socket.id)?.privateroom
+
+        const message = await Message.findOneAndDelete({id})
+        console.log(message);
+        
+        if (room){
+            return io.to(room).emit('deletedMessage', message)
+        }
+        if (privateRoom){
+            return io.to(privateRoom).emit('deletedMessage', message)
+        }
+    })
 
     socket.on('typing', () => {
 

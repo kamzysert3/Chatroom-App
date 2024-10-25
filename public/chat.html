@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Greysoft Intern Chatroom</title>
+    <title>Chatter</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js" integrity="sha512-11t8Q+vY9JlCrr+PveZKTYJq8n7O09Y5X/pk/aMd3vJugSvu4xOunGEUzaADqL3I8cZKE/pBwwCfXzDkRJh2sQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script defer src="app.js"></script>
@@ -148,6 +148,18 @@
                 </div>
                 <button type="submit"><span>Send Request</span><i class="fas fa-user-plus"></i></button>
                 <button type="button" class="close-add-friend-dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </form>
+            <form class="edit-message-dialog">
+                <h1>Edit Message</h1>
+                <div class="field-item">
+                    <label for="edited-message">Message</label>
+                    <input type="text" id="edited-message" placeholder="Enter message" autocomplete="off" required>
+                    <input type="hidden" id="edited-message-id">
+                </div>
+                <button type="submit"><span>Send</span><i class="fas fa-paper-plane"></i></button>
+                <button type="button" class="close-edit-message-dialog">
                     <i class="fas fa-times"></i>
                 </button>
             </form>

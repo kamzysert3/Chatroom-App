@@ -1,16 +1,27 @@
 const express = require('express');
 const User = require('../models/User');
-const PrivateChat = require('../models/PrivateChat');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 var bodyParser = require('body-parser');
 const privateChat = require('../models/PrivateChat');
+const nodemailer = require('nodemailer')
 
 router.use(bodyParser.json())
 
 // Use the generated secret key
 const JWT_SECRET = '9878924f604a926a44cacd21fd5e9b8061c2beae286f570902d16b0229f224f9fcf4e3d046e682e614c6971327b49409626de20248677f6fcbaaba3ef063147a'; // Replace with your actual generated secret key
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'hq.chatter@gmail.com',
+        pass: 'etrc kpdl meew yvnd'
+    }
+})
+
+let setOtp;
+let otpExpirationTime;
 
 // Register a new user
 router.post('/register', async (req, res) => {
@@ -95,6 +106,120 @@ router.post('/login', async (req, res) => {
         res.status(500).json({
             success: false,
             error: err.message
+        });
+    }
+});
+
+router.post('/get_otp', async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+        const generateAlphanumericOtp = (length = 6) => {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let otp = '';
+            for (let i = 0; i < length; i++) {
+                otp += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return otp;
+        };
+        setOtp = generateAlphanumericOtp(6);
+        otpExpirationTime = Date.now() + 10 * 60 * 1000; // Set expiration time to 10 minutes from now
+        const mailOptions = {
+            from: 'hq.chatter@gmail.com',
+            to: email,
+            subject: 'OTP Verification',
+            html: `
+                <div style="font-family: Arial, sans-serif; color: #333; text-align: center; padding: 20px;">
+                    <h2 style="color: #4CAF50;">OTP Verification</h2>
+                    <p>Dear ${user.name},</p>
+                    <p>Your One Time Password (OTP) for verification is:</p>
+                    <h1 style="background-color: #f4f4f4; display: inline-block; padding: 10px 20px; border-radius: 5px; color: #333;">${setOtp}</h1>
+                    <p>Please enter this code to complete your verification. This OTP is valid for the next 10 minutes.</p>
+                    <p>If you did not request this, please ignore this email.</p>
+                    <br>
+                    <p>Best regards,</p>
+                    <p>Your Company Team</p>
+                </div>
+            `
+        }
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ', info.response);
+            }
+        });
+        res.status(200).json({
+            success: true,
+            message: 'OTP sent successfully'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+router.post('/verify_otp', async (req, res) => {
+    const { otp } = req.body;
+    const isOtpValid = (userOtp, storedOtp, otpExpirationTime) => {
+        const currentTime = Date.now();
+        if (userOtp === storedOtp && currentTime <= otpExpirationTime) {
+            return true; // OTP is valid
+        } else if (currentTime > otpExpirationTime) {
+            return false; // OTP has expired
+        } else {
+            return false; // OTP is incorrect
+        }
+    };
+    try {
+        if (isOtpValid(otp, setOtp, otpExpirationTime)) {
+            res.status(200).json({
+                success: true,
+                message: 'OTP verified successfully'
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                error: 'Invalid OTP'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+router.post('/change-password', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+        user.password = password;
+        await user.save();
+        res.status(200).json({
+            success: true,
+            message: 'Password changed successfully',
+            redirect: '/'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
         });
     }
 });

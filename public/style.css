@@ -411,7 +411,7 @@ button {
     z-index: 5;
 }
 
-.create-room-dialog, .join-room-dialog, .add-friend-dialog{
+.create-room-dialog, .join-room-dialog, .add-friend-dialog, .edit-message-dialog{
     width: 60%;
     /* aspect-ratio: 16/9; */
     border-radius: 20px;
@@ -425,21 +425,21 @@ button {
     display: block !important;
 }
 
-.create-room-dialog h1, .join-room-dialog h1, .add-friend-dialog h1{
+.create-room-dialog h1, .join-room-dialog h1, .add-friend-dialog h1, .edit-message-dialog h1{
     font-size: 1.5rem;
     text-align: center;
     margin: 20px;
 }
 
-.create-room-dialog div, .join-room-dialog div, .add-friend-dialog div{
+.create-room-dialog div, .join-room-dialog div, .add-friend-dialog div, .edit-message-dialog div{
     margin-bottom: 10px;
 }
 
-.create-room-dialog button[type=submit] span, .join-room-dialog button[type=submit] span, .add-friend-dialog button[type=submit] span{
+.create-room-dialog button[type=submit] span, .join-room-dialog button[type=submit] span, .add-friend-dialog button[type=submit] span, .edit-message-dialog button[type=submit] span{
     display: block;
 }
 
-.create-room-dialog button[type=submit] i, .join-room-dialog button[type=submit] i, .add-friend-dialog button[type=submit] i{
+.create-room-dialog button[type=submit] i, .join-room-dialog button[type=submit] i, .add-friend-dialog button[type=submit] i, .edit-message-dialog button[type=submit] i{
     display: none;
 }
 
@@ -450,6 +450,29 @@ button {
 .popup
 {
     display: none;
+}
+
+.context-menu {
+    position: absolute;
+    background-color: #232930;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    z-index: 5;
+    & ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        & li {
+            padding: 5px;
+            cursor: pointer;
+            &:hover {
+                background-color: #0052cc;
+            }
+        }
+    }
 }
 
 @media (min-width: 769px) {
@@ -692,15 +715,15 @@ button {
         display: none;
     }
 
-    .create-room-dialog, .join-room-dialog, .add-friend-dialog{
+    .create-room-dialog, .join-room-dialog, .add-friend-dialog, .edit-message-dialog{
         width: 80%;
     }
 
-    .create-room-dialog button[type=submit] span, .join-room-dialog button[type=submit] span, .add-friend-dialog button[type=submit] span{
+    .create-room-dialog button[type=submit] span, .join-room-dialog button[type=submit] span, .add-friend-dialog button[type=submit] span, .edit-message-dialog button[type=submit] span{
         display: none;
     }
 
-    .create-room-dialog button[type=submit] i, .join-room-dialog button[type=submit] i, .add-friend-dialog button[type=submit] i{
+    .create-room-dialog button[type=submit] i, .join-room-dialog button[type=submit] i, .add-friend-dialog button[type=submit] i, .edit-message-dialog button[type=submit] i{
         display: block;
     }
 
