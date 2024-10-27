@@ -6,6 +6,12 @@ const jwt = require('jsonwebtoken');
 var bodyParser = require('body-parser');
 const privateChat = require('../models/PrivateChat');
 const nodemailer = require('nodemailer')
+const redis = require('redis');
+
+const redisClient = redis.createClient({
+    url: 'redis://red-csfao188fa8c739tetvg:6379'
+});
+redisClient.connect();
 
 router.use(bodyParser.json())
 
@@ -19,9 +25,6 @@ const transporter = nodemailer.createTransport({
         pass: 'etrc kpdl meew yvnd'
     }
 })
-
-let setOtp;
-let otpExpirationTime;
 
 // Register a new user
 router.post('/register', async (req, res) => {
@@ -128,8 +131,13 @@ router.post('/get_otp', async (req, res) => {
             }
             return otp;
         };
-        setOtp = generateAlphanumericOtp(6);
-        otpExpirationTime = Date.now() + 10 * 60 * 1000; // Set expiration time to 10 minutes from now
+        const setOtp = generateAlphanumericOtp(6);
+        console.log(setOtp);
+        
+        const otpExpirationTime = 10 * 60
+
+        await redisClient.setEx(`otp:${email}`, otpExpirationTime, setOtp)
+
         const mailOptions = {
             from: 'hq.chatter@gmail.com',
             to: email,
@@ -148,13 +156,13 @@ router.post('/get_otp', async (req, res) => {
                 </div>
             `
         }
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log('Email sent: ', info.response);
-            }
-        });
+        // transporter.sendMail(mailOptions, (error, info) => {
+        //     if (error) {
+        //         console.log(error);
+        //     } else {
+        //         console.log('Email sent: ', info.response);
+        //     }
+        // });
         res.status(200).json({
             success: true,
             message: 'OTP sent successfully'
@@ -168,19 +176,21 @@ router.post('/get_otp', async (req, res) => {
 });
 
 router.post('/verify_otp', async (req, res) => {
-    const { otp } = req.body;
-    const isOtpValid = (userOtp, storedOtp, otpExpirationTime) => {
-        const currentTime = Date.now();
-        if (userOtp === storedOtp && currentTime <= otpExpirationTime) {
-            return true; // OTP is valid
-        } else if (currentTime > otpExpirationTime) {
-            return false; // OTP has expired
-        } else {
-            return false; // OTP is incorrect
-        }
-    };
+    const { email, otp } = req.body;
     try {
-        if (isOtpValid(otp, setOtp, otpExpirationTime)) {
+        // Retrieve OTP from Redis
+        const storedOtp = await redisClient.get(`otp:${email}`);
+    
+        if (!storedOtp) {
+            return res.status(400).json({
+                success: false,
+                error: 'OTP not found or expired'
+            });
+        }
+
+        if (storedOtp.toString() === otp.toString()) {
+            await redisClient.del(`otp:${email}`);
+
             res.status(200).json({
                 success: true,
                 message: 'OTP verified successfully'
