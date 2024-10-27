@@ -136,7 +136,6 @@ router.post('/get_otp', async (req, res) => {
         const otpExpirationTime = 10 * 60
         
         await redisClient.setEx(`otp:${email}`, otpExpirationTime, setOtp)
-        console.log(await redisClient.get(`otp:${email}`));
 
         const mailOptions = {
             from: 'hq.chatter@gmail.com',
@@ -156,13 +155,13 @@ router.post('/get_otp', async (req, res) => {
                 </div>
             `
         }
-        // transporter.sendMail(mailOptions, (error, info) => {
-        //     if (error) {
-        //         console.log(error);
-        //     } else {
-        //         console.log('Email sent: ', info.response);
-        //     }
-        // });
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ', info.response);
+            }
+        });
         res.status(200).json({
             success: true,
             message: 'OTP sent successfully'
