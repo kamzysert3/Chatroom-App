@@ -132,11 +132,11 @@ router.post('/get_otp', async (req, res) => {
             return otp;
         };
         const setOtp = generateAlphanumericOtp(6);
-        console.log(setOtp);
         
         const otpExpirationTime = 10 * 60
-
+        
         await redisClient.setEx(`otp:${email}`, otpExpirationTime, setOtp)
+        console.log(await redisClient.get(`otp:${email}`));
 
         const mailOptions = {
             from: 'hq.chatter@gmail.com',
