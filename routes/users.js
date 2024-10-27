@@ -144,7 +144,7 @@ router.post('/get_otp', async (req, res) => {
                     <p>If you did not request this, please ignore this email.</p>
                     <br>
                     <p>Best regards,</p>
-                    <p>Your Company Team</p>
+                    <p>Chatter Team</p>
                 </div>
             `
         }
